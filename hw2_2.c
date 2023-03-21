@@ -7,10 +7,11 @@
  int main(int argc, char *argv[]) {
     DIR *dir = NULL;
     struct dirent *ent = NULL;
+    struct tm *lt;
+    struct stat st;
 
     // TO DO: open current directory using opendir()
     dir = opendir(".");
-
 
     // TO DO:
 	// 	repeat until there is more more directory entry
@@ -22,16 +23,15 @@
         printf("Could not open current directory");
         return 0;
     }
-    
 
     while ((ent = readdir(dir)) != NULL) {
-
-        printf("%s, uid = %ld, gid = %ld, size = %ld, modified date = %ld\n", ent->d_name, (long)sb.st_uid, (long)sb.st_gid, (long)sb.st_size, sb.st_mtime);
+        stat(ent->d_name, &st);
+        lt = localtime(&st.st_mtime);
+        printf("%s, uid = %d, gid = %d, size = %d, modified date = %d/%d/%d\n", ent->d_name, (int)st.st_uid, (int)st.st_gid, (int)st.st_size, (int)lt->tm_year+1900, (int)lt->tm_mon+1, (int)lt->tm_mday);
     }
 
     // TO DO: close directory
     closedir(dir);
-
     return 0;
  }
  
