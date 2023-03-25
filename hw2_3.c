@@ -179,7 +179,7 @@ int CopyFile(char *src_path, char *dest_path)
 
 	// TO DO: on failure, display an error message and return FALSE
 	if (src < 0) {
-		printf("Error!\n");
+		printf("Failed to open Source File!\n");
 		return FALSE;
 	}
 
@@ -188,7 +188,7 @@ int CopyFile(char *src_path, char *dest_path)
 
 	// TO DO: on failure, display an error message and return FALSE
 	if (dest < 0) {
-		printf("Error!\n");
+		printf("Failed to open Destination!\n");
 		return FALSE;
 	}
 
@@ -199,18 +199,19 @@ int CopyFile(char *src_path, char *dest_path)
 	// repeat until there is no more byte to read
 	//		read maximum BUFFER_SIZE bytes from the source file into the buffer, storing the number of bytes actually read in a variable.
 	//		write the buffer into the destination file
-
-	//while()
-
-
-
-
-
+	while (1) {
+		read_size = read(src, buffer, BUFFER_SIZE);
+		if (read_size == 0) {
+			printf("read size = %d, written size = %d\n", (int)read_size, (int)written_size);
+			break;
+		}
+		written_size = write(dest, buffer, read_size);
+		printf("read size = %d, written size = %d\n", (int)read_size, (int)written_size);
+	}
 
 	// TO DO: close the source and destination files
-
-
-
+	close(src);
+	close(dest);
 
 	return TRUE;
 }
