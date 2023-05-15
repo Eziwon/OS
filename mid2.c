@@ -1,4 +1,48 @@
-//My previous solution was perfect, so I didn't modify it!
+/*
+
+	This program reads an integer expression from the user and computes the result using a child process.
+	The parent and child processes communicate with each other through shared memory.
+	Implement this program following the instructions.
+	Append "[parent]" and "[child]" to all messages in Parent() and Child() respectively.
+
+	Example)
+`		shmid = 10
+		[parent] Input an integer binary expressions(type "quit" to finish.): 5 + 3
+		[child] received expression "5 + 3"
+		[child] sending result "8"
+		[parent] 5 + 3 = 8
+		[parent] Input an integer binary expressions(type "quit" to finish.): 7 *2
+		[child] received expression "7 *2"
+		[child] sending result "14"
+		[parent] 7 *2 = 14
+		[parent] Input an integer binary expressions(type "quit" to finish.): 9/2
+		[child] received expression "9/2"
+		[child] sending result "4"
+		[parent] 9/2 = 4
+		[parent] Input an integer binary expressions(type "quit" to finish.): quit
+		[child] received expression "quit"
+		[parent] Terminating Parent.
+		[child] Terminating Child.
+
+
+	You can use the following Linux commands to list or remove shared memory blocks
+		ipcs				// show infromation on IPC facilities
+		ipcrm -m <shm-id>	// delete a shared memory block
+
+
+	After the program terminates, your program should not leave a shared memory block
+	Example)
+		$ ipcs
+		...
+		------ Shared Memory Segments --------
+		key        shmid      owner      perms      bytes      nattch     status
+		0x00000000 2          lightdm    600        524288     2          dest
+		0x00000000 3          lightdm    600        33554432   2          dest
+
+		// no shared memory block created by the user
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,12 +69,36 @@ typedef struct {
 	char buffer[MAX_LEN];	
 } SharedBuffer;
 
+/*
+	Transferring data through SharedBuffer
+
+	sender:
+		wait until is_loaded becomes FALSE
+		store data in buffer
+		set is_loaded to TRUE
+		
+	receiver:
+		wait until is_loaded becomes TRUE
+		retrieve data from buffer
+		set is_loaded to FALSE
+
+*/
+
 void* Parent(void *arg);
 void* Child(void *arg);
 int Evaluate(char *expression);
 
 int main(int argc, char *argv[])
 {
+    // TO DO: allocate an array composed of two SharedBuffer instances in a shared memory block
+	//		the size of shared memory block should be sizeof(SharedBuffer) * 2.
+	// 		one is for data transfer from the parent to the child.
+	// 		the other is for data transfer from the child to the parent.
+	//		call shmget() and shmat()
+	// 		on failure, display an error message, deallocate the shared memory block if necessary, and quit.
+	// 		otherwise, display the id of the shared memory block for debug.
+
+
     /*교수님 코드
     int shmid = shmget(IPC_PRIVATE, sizeof(SharedBuffer) * 2, S_IRUSR | S_IWUSR);
     if (seg_id == -1) {
@@ -61,11 +129,23 @@ int main(int argc, char *argv[])
 		}
 		printf("shmid = %d\n", seg_id);
 
+    // initialize shm_buffer[0] and shm_buffer[1] (set the is_loaded fields to FALSE and the buffer fields to an empty string.)
 	shm_buffer[P2C].is_loaded = FALSE;
 	shm_buffer[P2C].buffer[0] = 0;
 	shm_buffer[C2P].is_loaded = FALSE;
 	shm_buffer[C2P].buffer[0] = 0;
     
+
+    // TO DO: create a child process
+	// 		on failure, display an error message, detatch and deallocate the shared memory block, and terminate.
+	//		In the child process,
+	//			call the Child() function passing the address to the SharedBuffer array.
+	//			detatch the shared memory block
+	//			call exit(0) for safety
+	// 		In the parent process,
+	//			call the Parent() function passing the address to the SharedBuffer array.
+	//			detatch and destroy the shared memory block
+
     /*
      교수님 코드
     pid_t child = fork();
@@ -116,8 +196,28 @@ int main(int argc, char *argv[])
 }
 
 void* Parent(void *arg)
-
+// TO DO: implement this function
+// 		read integer expressions from the user
+// 		send the expression to the child process through the shareed memory buffer
+//		receive the result from the child through the shared memory buffer
+//		display the expression and result
 {
+    // Algorithm)
+	//	repeat until the user types "quit"
+	// 		read an integer expression as a string (e.g., "5+3", "7 * 5", etc.) - use fgets()
+	// 		if the input is not an empty string,
+	// 			send the expression to the child through shm_buffer[P2C]
+	// 				wait until the is_loaded field is FALSE
+	//				copy the expression into the buffer field
+	//				set the is_loaded field to TRUE
+	// 			if the input string is "quit", break the loop
+	// 			receive the result of the expression from the child through shm_buffer[C2P]
+	//				wait until the is_loaded field is TRUE
+	//				copy the result from the buffer field
+	//				set the is_loaded field to FALSE
+	// 			display the expression and the result from the child.
+	//	display a message indicating that the parent is terminating.
+    
 	SharedBuffer *shm_buffer = (SharedBuffer *)arg;
 
 	char expression[MAX_LEN] = "";
