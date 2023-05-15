@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
 		key_t key = ftok(".", 'S');
 		ssize_t size = sizeof(SharedBuffer)*2;
 		SharedBuffer *shm_buffer;
+        
 		if ((seg_id = shmget(key, size, IPC_CREAT|0666)) == -1) {
 				printf("shmget() error!\n");
 				return 0;
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
 	shm_buffer[P2C].buffer[0] = 0;
 	shm_buffer[C2P].is_loaded = FALSE;
 	shm_buffer[C2P].buffer[0] = 0;
-
+    
 	pid_t child = fork();
 	if (child < 0) {
 			printf("fork() error!\n");
